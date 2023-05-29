@@ -1,0 +1,11 @@
+{
+  "name": "Trading-NFTs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.0",
+    "@truffle/hdwallet-provider": "^2.1.11",
+    "dotenv": "^16.0.3"
+  }
+}
