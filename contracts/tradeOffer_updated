@@ -503,6 +503,8 @@ contract tradeOffer {
             abi.encodePacked(offer, uint256ToString(offerAmount5), " Wool ");
         }
 
+        abi.encodePacked(offer, " For ");
+
     //Add Wanted tokens to the offer string
         //concatenate offer string with Clay wanted if any
         if (wantedAmount1 > 0) {
