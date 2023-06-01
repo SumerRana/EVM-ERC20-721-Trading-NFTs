@@ -1,128 +1,115 @@
 import Web3 from 'web3';
-import { Contract } from 'web3-eth-contract';
-import { tradeOfferAddress } from './constants';
 import tradeOffer from './contracts/tradeOffer';
+import { tradeOfferAddress } from './constants';
 
-export default class Wrapper {
-    web3: Web3;
-    chainId: number;
-    account: string;
-    wrapperOptions: any;    
-    Contract: tradeOffer;
+//work here
 
-    constructor(web3: Web3, chainId: number, account: string, options = {}) {
-        this.web3 = web3;
-        this.chainId = chainId;
-        this.account = account;
+export default class tradeOfferWrapper {
+  web3: Web3;
+  chainId: number;
+  account: string;
+  wrapperOptions: any;
+  Contract: tradeOffer;
 
-        this.wrapperOptions = {
-            web3,
-            chainId,
-            account,
-            ...options
-        };
+  constructor(web3, chainId, account, options = {}) {
 
-        this.Contract = new tradeOffer(this.wrapperOptions, tradeOfferAddress.Contract[this.chainId]);
+    this.web3 = web3;
+    this.chainId = chainId;
+    this.account = account;
+
+    this.wrapperOptions = {
+      web3, chainId, account, ...options
     }
 
-    export async function makeOffer(
-        contractAddress: string,
-        signer: ethers.Signer,
-        offerAmounts: Array<number>,
-        wantedAmounts: Array<number>
-      ): Promise<number> {
-        const contract = new Contract(contractAddress, tradeOfferABI, signer);
-      
-        try {
-          const transaction = await contract.makeOffer(
-            offerAmounts,
-            wantedAmounts
-          );
-      
-          await transaction.wait();
-      
-          // Get the latest offer ID
-          const offerCounter = await contract.offerCounter();
-          return offerCounter.toNumber() - 1;
-        } catch (error) {
-          console.error("Error making offer:", error);
-          throw error;
-        }
-      }
-      
-      export async function acceptOffer(
-        contractAddress: string,
-        signer: ethers.Signer,
-        offerId: number
-      ): Promise<void> {
-        const contract = new Contract(contractAddress, tradeOfferABI, signer);
-      
-        try {
-          const transaction = await contract.acceptOffer(offerId);
-          await transaction.wait();
-        } catch (error) {
-          console.error("Error accepting offer:", error);
-          throw error;
-        }
-      }
-      
-      export async function withdrawOffer(
-        contractAddress: string,
-        signer: ethers.Signer,
-        offerId: number
-      ): Promise<void> {
-        const contract = new Contract(contractAddress, tradeOfferABI, signer);
-      
-        try {
-          const transaction = await contract.withdraw(offerId);
-          await transaction.wait();
-        } catch (error) {
-          console.error("Error withdrawing offer:", error);
-          throw error;
-        }
-      }
-      
-      export async function getContractAssets(
-        contractAddress: string
-      ): Promise<Array<number>> {
-        const contract = new Contract(contractAddress, tradeOfferABI);
-      
-        try {
-          const [balance1, balance2, balance3, balance4, balance5] =
-            await contract.getContractAssets();
-          return [balance1.toNumber(), balance2.toNumber(), balance3.toNumber(), balance4.toNumber(), balance5.toNumber()];
-        } catch (error) {
-          console.error("Error getting contract assets:", error);
-          throw error;
-        }
-      }
-      
-      export async function getOffer(
-        contractAddress: string,
-        offerId: number
-      ): Promise<[number, number, number, number, number, number, number, number, number, number]> {
-        const contract = new Contract(contractAddress, tradeOfferABI);
-      
-        try {
-          const offer = await contract.getOffer(offerId);
-          return offer.map((value: ethers.BigNumber) => value.toNumber());
-        } catch (error) {
-          console.error("Error getting offer:", error);
-          throw error;
-        }
-      }
-      
-      export async function getOfferString(
-        contractAddress: string,
-        offerId: number
-      ): Promise<string> {
-        const contract = new Contract(contractAddress, tradeOfferABI);
-      
-        try {
-          const offerString = await contract.getOfferString(offerId);
-          return offerString;
-        } catch (error) {
-          console.error("Error getting offer string:", error);
-          throw error;
-        }
-      }
+    this.Contract = new tradeOffer(this.wrapperOptions, tradeOfferAddress.Contract[this.chainId]);
+  }
+
+  async balanceOf(): Promise<unknown> {
+    try {
+      const balance = await this.Contract.call("balanceOf", this.account);
+      return balance;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async makeOffer(
+    _offerAmount1: number,
+    _offerAmount2: number,
+    _offerAmount3: number,
+    _offerAmount4: number,
+    _offerAmount5: number,
+
+    _wantedAmount1: number,
+    _wantedAmount2: number,
+    _wantedAmount3: number,
+    _wantedAmount4: number,
+    _wantedAmount5: number): Promise<unknown> {
+    try {
+      const tx = await this.Contract.send(
+        "makeOffer", 
+      { from: this.account },
+        _offerAmount1,
+        _offerAmount2,
+        _offerAmount3,
+        _offerAmount4,
+        _offerAmount5,
+
+        _wantedAmount1,
+        _wantedAmount2,
+        _wantedAmount3,
+        _wantedAmount4,
+        _wantedAmount5);
+      return tx;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async acceptOffer(_offerId: number): Promise<unknown> {
+    try {
+      const tx = await this.Contract.send("tokenOfOwnerByIndex", this.account, _offerId);
+      return tx;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async withdraw(_offerId: number): Promise<unknown> {
+    try {
+      const tx = await this.Contract.send("withdraw", this.account, _offerId);
+      return tx;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getContractAssets() : Promise<unknown> {
+    try {
+        const ContractAssets = await this.Contract.call("getContractAssets");
+        return ContractAssets;
+    } catch (error) { 
+        throw error;
+    }
+  }
+
+  async getOffer(_offerId: number) : Promise<unknown> {
+    try {
+        const Offer = await this.Contract.call("getOffer", _offerId);
+        return Offer;
+    } catch (error) { 
+        throw error;
+    }
+  }
+
+  async getOfferString(_offerId: number) : Promise<unknown> {
+    try {
+        const OfferString = await this.Contract.call("getOfferString", _offerId);
+        return OfferString;
+    } catch (error) { 
+        throw error;
+    }
+  }
+
+  
+}
